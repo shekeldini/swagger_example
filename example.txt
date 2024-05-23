@@ -68,16 +68,29 @@ paths:
         - Calculations
       summary: Get Result
       operationId: get_result_fa_calculations_v1__id__show_get
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            title: Id
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
+                type: array
                 items:
                   $ref: '#/components/schemas/ShowCalculationItem'
-                type: array
                 title: Response Get Result Fa Calculations V1  Id  Show Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /fa/handbooks/v1/layers:
     get:
       tags:
