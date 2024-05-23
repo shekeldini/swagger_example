@@ -1,0 +1,362 @@
+openapi: 3.1.0
+info:
+  title: Server
+  description: FastApi server
+  version: 1.0.0
+paths:
+  /fa/calculations/v1:
+    get:
+      tags:
+        - Calculations
+      summary: Get
+      operationId: get_fa_calculations_v1_get
+      parameters:
+        - name: sortBy
+          in: query
+          required: false
+          schema:
+            type: string
+            default: id:asc
+            title: Sortby
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportItem'
+                title: Response Get Fa Calculations V1 Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+        - Calculations
+      summary: Post
+      operationId: post_fa_calculations_v1_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: '#/components/schemas/CreateFAReport'
+                - $ref: '#/components/schemas/CreateGOSFINReport'
+                - $ref: '#/components/schemas/CreateVFLReport'
+              title: Item
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportItem'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /fa/calculations/v1/{id}/show:
+    get:
+      tags:
+        - Calculations
+      summary: Get Result
+      operationId: get_result_fa_calculations_v1__id__show_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ShowCalculationItem'
+                type: array
+                title: Response Get Result Fa Calculations V1  Id  Show Get
+  /fa/handbooks/v1/layers:
+    get:
+      tags:
+        - Handbooks
+      summary: Get
+      operationId: get_fa_handbooks_v1_layers_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/HandbookLayer'
+                type: array
+                title: Response Get Fa Handbooks V1 Layers Get
+  /fa/handbooks/v1/currency:
+    get:
+      tags:
+        - Handbooks
+      summary: Get
+      operationId: get_fa_handbooks_v1_currency_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/HandbookCurrency'
+                type: array
+                title: Response Get Fa Handbooks V1 Currency Get
+components:
+  schemas:
+    CalcType:
+      type: string
+      enum:
+        - FA
+        - GOSFIN
+        - VFL
+      title: CalcType
+    CreateFAReport:
+      properties:
+        calc_type:
+          allOf:
+            - $ref: '#/components/schemas/CalcType'
+          default: FA
+        currency:
+          type: integer
+          title: Currency
+        first_layer:
+          anyOf:
+            - $ref: '#/components/schemas/LayerNBK'
+            - $ref: '#/components/schemas/LayerKPP'
+          title: First Layer
+        second_layer:
+          anyOf:
+            - $ref: '#/components/schemas/LayerKPP'
+            - $ref: '#/components/schemas/LayerNBK'
+          title: Second Layer
+        comment:
+          type: string
+          title: Comment
+      type: object
+      required:
+        - currency
+        - first_layer
+        - second_layer
+        - comment
+      title: CreateFAReport
+    CreateGOSFINReport:
+      properties:
+        calc_type:
+          allOf:
+            - $ref: '#/components/schemas/CalcType'
+          default: GOSFIN
+        date:
+          type: string
+          format: date
+          title: Date
+      type: object
+      required:
+        - date
+      title: CreateGOSFINReport
+    CreateVFLReport:
+      properties:
+        calc_type:
+          allOf:
+            - $ref: '#/components/schemas/CalcType'
+          default: VFL
+        currency:
+          type: integer
+          title: Currency
+        report_date:
+          type: string
+          format: date
+          title: Report Date
+        previous_report_date:
+          type: string
+          format: date
+          title: Previous Report Date
+      type: object
+      required:
+        - currency
+        - report_date
+        - previous_report_date
+      title: CreateVFLReport
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    HandbookCurrency:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+      type: object
+      required:
+        - id
+        - name
+      title: HandbookCurrency
+    HandbookLayer:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+      type: object
+      required:
+        - id
+        - name
+      title: HandbookLayer
+    LayerKPP:
+      properties:
+        source_type:
+          type: string
+          title: Source Type
+          default: KPP
+        layer:
+          type: integer
+          title: Layer
+        date_start:
+          type: string
+          format: date
+          title: Date Start
+        date_end:
+          type: string
+          format: date
+          title: Date End
+      type: object
+      required:
+        - layer
+        - date_start
+        - date_end
+      title: LayerKPP
+    LayerNBK:
+      properties:
+        source_type:
+          type: string
+          title: Source Type
+          default: NBK
+        date_start:
+          type: string
+          format: date
+          title: Date Start
+        date_end:
+          type: string
+          format: date
+          title: Date End
+      type: object
+      required:
+        - date_start
+        - date_end
+      title: LayerNBK
+    ReportItem:
+      properties:
+        calc_id:
+          type: integer
+          title: Calc Id
+        calc_type:
+          type: string
+          title: Calc Type
+        source:
+          type: string
+          title: Source
+        start_calculation:
+          type: string
+          format: date
+          title: Start Calculation
+        first_layer_date:
+          type: string
+          format: date
+          title: First Layer Date
+        status:
+          $ref: '#/components/schemas/StatusReport'
+        detail:
+          anyOf:
+            - $ref: '#/components/schemas/CreateFAReport'
+            - $ref: '#/components/schemas/CreateVFLReport'
+            - $ref: '#/components/schemas/CreateGOSFINReport'
+          title: Detail
+      type: object
+      required:
+        - calc_id
+        - calc_type
+        - source
+        - start_calculation
+        - first_layer_date
+        - status
+        - detail
+      title: ReportItem
+    ShowCalculationItem:
+      properties:
+        step:
+          type: integer
+          title: Step
+        group:
+          type: integer
+          title: Group
+        number:
+          type: integer
+          title: Number
+        currency:
+          type: integer
+          title: Currency
+        name:
+          type: string
+          title: Name
+        value_1:
+          type: number
+          title: Value 1
+        value_2:
+          type: number
+          title: Value 2
+      type: object
+      required:
+        - step
+        - group
+        - number
+        - currency
+        - name
+        - value_1
+        - value_2
+      title: ShowCalculationItem
+    StatusReport:
+      type: string
+      enum:
+        - DONE
+        - PENDING
+        - ERROR
+      title: StatusReport
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
